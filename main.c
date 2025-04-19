@@ -4,17 +4,40 @@
 #include <string.h>
 
 
+int gerarMatricula() {
+    int i, matricula;
+    for (i = 0; i < 5; i++) { //Criando a matricula
+        matricula = rand() % 100000; // Convertendo int's para strings
+    }
+        
+    return matricula;
+}
+
+int gerarIndex (const char *fileName) {
+    int index = 0;
+    int i;
+    FILE *arquivo = fopen(fileName, "r"); //abre o arquivo em modo de leitura
+    if (arquivo == NULL) { //checa se o arquivo foi aberto
+        printf("Erro ao abrir o arquivo.\n"); 
+        return -1;
+    }
+    while ((i = fgetc(arquivo)) != EOF) { //inicia um looping verificando cada caractere, enquanto não encontrar um fim do arquivo
+        if (i == '\n') {
+            index++; //adicionando 1 ao index toda vez que o codigo achar uma quebra de linha
+        }
+    }
+    fclose(arquivo);
+    return index;
+}
+
 int main() {
 
     srand(time(NULL)); //Gerando a seed para o srand baseado no tempo no sistema operacional
 
     const char *mainFName = "Arquivo.csv";
 
-    int index = 0;
-    char nome[50], materia[50], matricula[6];
-    char appendString[250];
-    char stringConversor[100];
     
+    char nome[50], materia[100], matricula[6];
 
     FILE *arquivo = fopen(mainFName, "r+"); //Tentando abrir o arquivo
 
@@ -55,35 +78,13 @@ int main() {
                 break;
             case 2:
               printf("Digite o nome do aluno: ");
-              scanf("%s", nome);
+              scanf("%s", &nome);
               printf("Digite a materia em que o aluno sera matriculado: ");
-              scanf("%s", materia);
-              for (i = 0; i < 5; i++) { //Criando a matricula
-                matricula[i] = '0' + (rand() % 10); // Convertendo int's para strings
-            }
-                matricula[5] = '\0'; // Fechando a string
+              scanf("%s", &materia);
 
-                snprintf(stringConversor, sizeof(stringConversor), "%d", index);
-
-                strncat(appendString, stringConversor, sizeof(stringConversor));
-                strncat(appendString, ",", 1);
-                strncat(appendString, nome, sizeof(nome));
-                strncat(appendString, ",", 1);
-                strncat(appendString, materia, sizeof(materia));
-                strncat(appendString, ",", 1);
-                strncat(appendString, matricula, sizeof(matricula));
-
-                printf(appendString);
-
-                arquivo = fopen(mainFName, "a");
-
-                fputs(appendString, arquivo);
-                fputs("\n", arquivo);
-
-                fclose(arquivo);
-
-                memset(appendString, 0, sizeof(appendString));
-                memset(stringConversor, 0, sizeof(stringConversor));
+                arquivo = fopen(mainFName, "a"); //Abrindo o arquivo em modo append
+                fprintf(arquivo, "%d,%s,%s,%d\n", gerarIndex(mainFName), nome, materia, gerarMatricula()); // Construção da linha
+                fclose(arquivo); //Fechando o arquivo
               
                 break;
             case 3:
