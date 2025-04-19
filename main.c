@@ -1,13 +1,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <string.h>
 
 
 int main() {
 
     srand(time(NULL)); //Gerando a seed para o srand baseado no tempo no sistema operacional
 
-    const char *mainFName = "Arquivo.txt";
+    const char *mainFName = "Arquivo.csv";
+
+    int index = 0;
+    char nome[50], materia[50], matricula[6];
+    char appendString[250];
+    char stringConversor[100];
+    
 
     FILE *arquivo = fopen(mainFName, "r+"); //Tentando abrir o arquivo
 
@@ -26,9 +33,6 @@ int main() {
     fclose(arquivo); // Fechando o arquivo para que possa ser aberto de diferentes formas futuramente
 
     //Arquivo aberto ou Criado
-
-    int index;
-    char nome[50], materia[50], matricula[6]; // Increased size to accommodate null terminator
 
     //Estrutura CSV ==> index,nome,materia,matricula (Ex 0,Eduardo,Biologia,25209) 
     
@@ -50,14 +54,36 @@ int main() {
                 // Código para Ver alunos matriulados
                 break;
             case 2:
-              printf("Digite o nome do aluno");
+              printf("Digite o nome do aluno: ");
               scanf("%s", nome);
-              printf("Digite a materia em que o aluno sera matriculado");
+              printf("Digite a materia em que o aluno sera matriculado: ");
               scanf("%s", materia);
               for (i = 0; i < 5; i++) { //Criando a matricula
                 matricula[i] = '0' + (rand() % 10); // Convertendo int's para strings
             }
                 matricula[5] = '\0'; // Fechando a string
+
+                snprintf(stringConversor, sizeof(stringConversor), "%d", index);
+
+                strncat(appendString, stringConversor, sizeof(stringConversor));
+                strncat(appendString, ",", 1);
+                strncat(appendString, nome, sizeof(nome));
+                strncat(appendString, ",", 1);
+                strncat(appendString, materia, sizeof(materia));
+                strncat(appendString, ",", 1);
+                strncat(appendString, matricula, sizeof(matricula));
+
+                printf(appendString);
+
+                arquivo = fopen(mainFName, "a");
+
+                fputs(appendString, arquivo);
+                fputs("\n", arquivo);
+
+                fclose(arquivo);
+
+                memset(appendString, 0, sizeof(appendString));
+                memset(stringConversor, 0, sizeof(stringConversor));
               
                 break;
             case 3:
@@ -75,8 +101,8 @@ int main() {
     } while (opt != 5);
 
     //Finalizando o programa
-
+    if (arquivo != NULL){
     fclose(arquivo);
-    
+    }
    return 0;
 }
