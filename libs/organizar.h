@@ -253,7 +253,7 @@ void exibirPaginas(char* inFile) {
         system("cls");
         printf("Exibindo pagina %d:\n", pagina);
         for (int i = inicio; i < fim && i < tamanho; i++) {
-            printf("#%i Nome: %s, Curso: %s, Matricula: %d\n",i, matriculas[i].nome, matriculas[i].curso, matriculas[i].matricula);
+            printf("#%i Nome: %s, Curso: %s, Matricula: %d\n",i + 1, matriculas[i].nome, matriculas[i].curso, matriculas[i].matricula);
         }
     }
 }
