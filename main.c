@@ -1,107 +1,130 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 #include <string.h>
-
+#include <time.h>
+#include "libs/organizar.h"
 
 int gerarMatricula() {
-    int i, matricula;
-    for (i = 0; i < 5; i++) { //Criando a matricula
-        matricula = rand() % 100000; // Convertendo int's para strings
+    int matricula = 0;
+    for (int i = 0; i < 6; i++) { //gerando numeros aleatorios 
+        matricula = matricula * 10 + (rand() % 10); //colocando numero ao final da matricula
     }
-        
+    if (matricula < 100000) { //garantindo que a matricula tenha 6 dígitos
+        matricula += 100000;
+    }
     return matricula;
-}
-
-int gerarIndex (const char *fileName) {
-    int index = 0;
-    int i;
-    FILE *arquivo = fopen(fileName, "r"); //abre o arquivo em modo de leitura
-    if (arquivo == NULL) { //checa se o arquivo foi aberto
-        printf("Erro ao abrir o arquivo.\n"); 
-        return -1;
-    }
-    while ((i = fgetc(arquivo)) != EOF) { //inicia um looping verificando cada caractere, enquanto não encontrar um fim do arquivo
-        if (i == '\n') {
-            index++; //adicionando 1 ao index toda vez que o codigo achar uma quebra de linha
-        }
-    }
-    fclose(arquivo);
-    return index;
 }
 
 int main() {
 
-    srand(time(NULL)); //Gerando a seed para o srand baseado no tempo no sistema operacional
+    srand(time(NULL)); //gerando a seed para o srand baseado no tempo no sistema operacional
 
-    const char *mainFName = "Arquivo.csv";
+    char nomeArquivo[100] = "";
+    char linha[256];
+
+    char arquivoDeSaida[256];
+    int oopt;
 
     
     char nome[50], materia[100], matricula[6];
 
-    FILE *arquivo = fopen(mainFName, "r+"); //Tentando abrir o arquivo
+    FILE *arquivo;
 
-    if (arquivo == NULL) { //Verificando se o arquivo foi aberto
-        printf("Criando Arquivo.\n");
-        arquivo = fopen(mainFName, "w"); //Craiando um arquivo caso não seja encontrado
-        if (arquivo == NULL) {
-            printf("Erro ao criar o arquivo");
-            return 1;
-        }
-        
-    } else {
-        printf("Arquivo encontrado. Pronto para manipulação\n");
-    }
-
-    fclose(arquivo); // Fechando o arquivo para que possa ser aberto de diferentes formas futuramente
-
-    //Arquivo aberto ou Criado
-
-    //Estrutura CSV ==> index,nome,materia,matricula (Ex 0,Eduardo,Biologia,25209) 
+    //estrutura CSV ==> index,nome,materia,matricula (Ex 0,Eduardo,Biologia,25209) 
     
     int opt;
     do { //iniciando o menu do programa
         printf("\nMenu:\n");
-        printf("1- Ver matriculas\n");
+        if (strlen(nomeArquivo) > 0) {
+            printf("Arquivo atual: %s\n\n", nomeArquivo);
+        } else {
+            printf("nenhum arquivo selecionado\n\n");
+        }
+        printf("1- Selecionar arquivo\n");
         printf("2- Adicionar matricula\n");
-        printf("3- Ornizar itens\n");
-        printf("4. Remover matricula\n");
-        printf("5. Sair\n");
-        printf("Escolha uma opção: ");
+        printf("3- Ornganizar itens\n");
+        printf("4- Visualizar matriculas\n");
+        printf("5- Sair\n");
+        printf("Escolha uma opcao: ");
         scanf("%d", &opt);
         int i;
-        
 
         switch (opt) {
-            case 1:
-                // Código para Ver alunos matriulados
+            case 1: 
+                printf("Digite o nome do arquivo (com extensao): ");
+                
+                scanf(" %[^\n]", nomeArquivo);
+
+                FILE *fp = fopen(nomeArquivo, "r");
+                if (fp == NULL) {
+                    printf("Arquivo nao encontrado. Criando arquivo...\n");
+                    fp = fopen(nomeArquivo, "w");
+                    if (fp == NULL) {
+                        printf("Erro ao criar o arquivo.\n");
+                        break;
+                    }
+                    fprintf(fp, "Nome,Curso,Matricula\n\n");
+                } else {
+                    printf("Arquivo encontrado. Pronto para manipulacao.\n");
+                }
+                fclose(fp);
                 break;
             case 2:
+                if (strlen(nomeArquivo) == 0 || (arquivo = fopen(nomeArquivo, "r")) == NULL) { //verificnado se algum arquivo foi seleciondo
+                    printf("nenhum arquivo selecionado\n");
+                    if (arquivo != NULL) fclose(arquivo);
+                    break;
+                }
+                fclose(arquivo);
               printf("Digite o nome do aluno: ");
-              scanf("%s", &nome);
+              scanf(" %[^\n]", nome);
               printf("Digite a materia em que o aluno sera matriculado: ");
-              scanf("%s", &materia);
+              scanf(" %[^\n]", materia);
 
-                arquivo = fopen(mainFName, "a"); //Abrindo o arquivo em modo append
-                fprintf(arquivo, "%d,%s,%s,%d\n", gerarIndex(mainFName), nome, materia, gerarMatricula()); // Construção da linha
-                fclose(arquivo); //Fechando o arquivo
-              
+                arquivo = fopen(nomeArquivo, "a"); //abrindo o arquivo para adicionar a matricula
+                if (arquivo == NULL) {
+                    printf("Erro ao abrir o arquivo.\n");
+                    break;
+                }
+                
+                sprintf(linha, "%s,%s,%d\n", nome, materia, gerarMatricula()); //construção da linha
+                fprintf(arquivo, "%s", linha); //escrevendo a matricula no arquivo
+                fclose(arquivo); //fechando o arquivo
                 break;
             case 3:
-                // Código para reorganizar as matriculas
+                printf("Digite o nome do arquivo organizado (arquivo de saida)");
+                scanf("%s", arquivoDeSaida);
+                printf("Selecione o por qual atributo deseja organizar:\n\n1-Nome\n2-Materia\n3-Matricula");
+                scanf("%d", &oopt);
+                switch (oopt) {
+                    case 1:
+                        ordenarPorNome(nomeArquivo, arquivoDeSaida);
+                        printf("Arquivo organizado por nome.\n");
+                        break;
+                    case 2:
+                        ordenarPorMateria(nomeArquivo, arquivoDeSaida);
+                        printf("Arquivo organizado por matéria.\n");
+                        break;
+                    case 3:
+                        ordenarPorMatricula(nomeArquivo, arquivoDeSaida);
+                        printf("Arquivo organizado por matrícula.\n");
+                        break;
+                    default:
+                        printf("Opcao invalida para organizacao.\n");
+                }
                 break;
             case 4:
-                // Código para remover uma matricula
+                exibirPaginas(nomeArquivo);
                 break;
             case 5:
                 printf("Saindo do programa...\n");
                 break;
             default:
-                printf("Opção inválida. Tente novamente.\n");
+                printf("Opcao invalida. Tente novamente.\n");
         }
     } while (opt != 5);
 
-    //Finalizando o programa
+    //finalizando o programa
     if (arquivo != NULL){
     fclose(arquivo);
     }
