@@ -7,7 +7,7 @@
 int gerarMatricula() {
     int i, matricula;
     for (i = 0; i < 5; i++) { //Criando a matricula
-        matricula = rand() % 100000; // Convertendo int's para strings
+        matricula = rand() % 100000; // Convertendo int's para strings.
     }
         
     return matricula;
